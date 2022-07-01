@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "CarameloApp": {
+      "commandName": "Project",
+      "remoteDebugEnabled": true,
+      "nativeDebugging": true
+    }
+  }
+}
