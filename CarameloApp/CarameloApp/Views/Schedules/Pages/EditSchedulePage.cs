@@ -2,14 +2,15 @@
 using System.Linq;
 using Xamarin.Forms;
 using CarameloApp.Models;
-using CarameloApp.Views.Schedules.Forms;
 using CarameloApp.Views.Shared.Components;
-using CarameloApp.Views.Shared.ContentAreas;
+using CarameloApp.Views.Shared.Components.ContentAreas;
 
 namespace CarameloApp.Views.Schedules.Pages
 {
-	// página de edição de agendamentos
-	public class EditSchedulePage : ScheduleForm
+	/// <summary>
+	/// Página para editar Agendamentos
+	/// </summary>
+	public class EditSchedulePage : ScheduleFormPage
 	{
 		private readonly Schedule _schedule;
 
@@ -17,7 +18,7 @@ namespace CarameloApp.Views.Schedules.Pages
 		{
 			_schedule = schedule;
 
-			if(_pets != null)
+			if (_pets != null)
 				_pets.ForEach(x => x.IsSelected = _schedule.Pets.Any(z => z.Id == x.Id));
 
 			Title = _schedule.ToString();
@@ -45,7 +46,7 @@ namespace CarameloApp.Views.Schedules.Pages
 
 			if (answer)
 			{
-				_scheduleRepository.Delete(_schedule);
+				_scheduleService.Delete(_schedule);
 
 				await DisplayAlert(null, $"Agendamento cancelado", "Ok");
 				await Navigation.PopAsync();
@@ -57,16 +58,18 @@ namespace CarameloApp.Views.Schedules.Pages
 			try
 			{
 				ValidateForm();
+				var userId = _sessionService.GetUserId();
 
 				Schedule schedule = new Schedule
 				{
 					Id = _schedule.Id,
 					DateTime = _datePicker.Date.AddTicks(_timePicker.Time.Ticks),
 					ServiceType = GetSelectedServiceType(),
-					Pets = _pets.Where(X => X.IsSelected).ToList()
+					Pets = _pets.Where(X => X.IsSelected).ToList(),
+					UserId = userId
 				};
 
-				_scheduleRepository.Update(schedule);
+				_scheduleService.Update(schedule);
 
 				await DisplayAlert(null, $"Agendamento atualizado", "Ok");
 				await Navigation.PopAsync();

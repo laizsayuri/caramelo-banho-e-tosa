@@ -5,10 +5,14 @@ using System.Collections.Generic;
 
 namespace CarameloApp.Models
 {
-	// classe agendamento
+	/// <summary>
+	/// Classe Agendamento e métodos auxiliares
+	/// </summary>
 	[Table("Schedule")]
 	public class Schedule : BaseEntity
 	{
+		[ForeignKey(typeof(User))]
+		public int UserId { get; set; }
 		public DateTime DateTime { get; set; }
 		public ServiceType ServiceType { get; set; }
 
@@ -20,7 +24,6 @@ namespace CarameloApp.Models
 		[Ignore]
 		public string DateTimeListAnotation => DateTime.ToString("dd/MM/yy - HH:mm");
 
-		// pega descrição do tipo de serviço
 		[Ignore]
 		public string ServiceTypeDescription
 		{
@@ -61,7 +64,6 @@ namespace CarameloApp.Models
 		public bool IsAGroom() => ServiceType.Groom == ServiceType;
 	}
 
-	// classe utilizada para gerar relacionamento muitos para muitos entre agendamento e pet
 	public class ScheduleAnimal
 	{
 		[ForeignKey(typeof(Schedule))]

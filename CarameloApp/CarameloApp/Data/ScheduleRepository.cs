@@ -1,12 +1,13 @@
 ﻿using SQLiteNetExtensions.Extensions;
-using System.Collections.Generic;
 using System.Linq;
 using CarameloApp.Models;
 
 namespace CarameloApp.Data
 {
-	// repositório de agendamentos
-	public class ScheduleRepository : BaseRepositoy
+	/// <summary>
+	/// Repositório para operações incluindo Agendamentos
+	/// </summary>
+	public class ScheduleRepository : BaseRepository
 	{
 		public ScheduleRepository()
 		{
@@ -14,24 +15,20 @@ namespace CarameloApp.Data
 			_db.CreateTable<ScheduleAnimal>();
 		}
 
-		public void Insert(Schedule schedule)
-		{
-			_db.InsertWithChildren(schedule);
-		}
+		public void Insert(Schedule schedule) => _db.InsertWithChildren(schedule);
 
 		public void Delete(Schedule schedule) => _db.Delete(schedule);
 
 		public void Update(Schedule schedule) => _db.UpdateWithChildren(schedule);
 
-		public List<Schedule> GetNotConcluded() => _db.GetAllWithChildren<Schedule>().Where(x => !x.Concluded).OrderBy(x => x.DateTime).ToList();
-		public List<Schedule> GetConcluded() => _db.GetAllWithChildren<Schedule>().Where(x => x.Concluded).OrderBy(x => x.DateTime).ToList();
-		public Schedule GetById(int id) => _db.GetAllWithChildren<Schedule>().Where(x => x.Id == id).FirstOrDefault();
+		public Schedule GetWithChildreen(int id) => _db.GetWithChildren<Schedule>(id);
 
-		internal void Conclude(int id)
+		public void RemoveEmptySchedules()
 		{
-			var schedule = GetById(id);
-			schedule.Concluded = true;
-			Update(schedule);
+			var emptySchedules = _db.GetAllWithChildren<Schedule>().Where(c => !c.Concluded && (c.Pets == null || !c.Pets.Any()));
+
+			foreach (var schedule in emptySchedules)
+				_db.Delete(schedule);
 		}
 	}
 }

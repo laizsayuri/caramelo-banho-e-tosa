@@ -1,8 +1,11 @@
-﻿using Xamarin.Forms;
+﻿using CarameloApp.Resources;
+using Xamarin.Forms;
 
 namespace CarameloApp.Views.Shared.Components
 {
-	//label personalizado do projeto
+	/// <summary>
+	/// Label personalizado
+	/// </summary>
 	public class CustomLabel : Label
 	{
 		public CustomLabel()

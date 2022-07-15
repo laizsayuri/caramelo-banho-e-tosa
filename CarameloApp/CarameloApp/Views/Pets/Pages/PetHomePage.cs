@@ -1,21 +1,28 @@
 ﻿using System;
 using System.Linq;
 using Xamarin.Forms;
-using CarameloApp.Data;
 using CarameloApp.Models;
-using CarameloApp.Views.Pets.ListViews;
-using CarameloApp.Views.Shared.ContentAreas;
 using CarameloApp.Views.Shared.Components;
+using CarameloApp.Services;
+using CarameloApp.Views.Shared.Components.ContentAreas;
+using CarameloApp.Views.Pets.Components;
+using CarameloApp.Views.Shared.Pages;
 
 namespace CarameloApp.Views.Pets.Pages
 {
-	// página inicial da área de pets
-	public class PetHomePage : ContentPage
+	/// <summary>
+	/// Listagem inicial de Pets
+	/// </summary>
+	public class PetHomePage : TabsRootPage
 	{
-		private readonly PetRepository _petRepository = DependencyService.Get<PetRepository>();
+		protected readonly PetService _petService;
+		protected readonly SessionService _sessionService;
 
-		public PetHomePage()
+		public PetHomePage(TabsPage root, ToolbarItem toolbarItem) : base(root, toolbarItem)
 		{
+			_petService = DependencyService.Get<PetService>();
+			_sessionService = DependencyService.Get<SessionService>();
+
 			Title = "Meus pets cadastrados";
 		}
 
@@ -25,8 +32,10 @@ namespace CarameloApp.Views.Pets.Pages
 		{
 			var center = new Center(new View[] {
 				GetPetsList()
-			});
-			center.Margin = new Thickness(0);
+			})
+			{
+				Margin = new Thickness(0)
+			};
 
 			var addPetButton = new CustomButton("Adicionar pet");
 			addPetButton.Clicked += AddPetButton_Clicked;
@@ -41,7 +50,7 @@ namespace CarameloApp.Views.Pets.Pages
 
 		private View GetPetsList()
 		{
-			var pets = _petRepository.GetAll();
+			var pets = _sessionService.GetPetList();
 
 			if (pets != null && pets.Any())
 			{

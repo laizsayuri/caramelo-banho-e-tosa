@@ -1,14 +1,15 @@
 ﻿using System;
 using Xamarin.Forms;
 using CarameloApp.Models;
-using CarameloApp.Views.Pets.Forms;
 using CarameloApp.Views.Shared.Components;
-using CarameloApp.Views.Shared.ContentAreas;
+using CarameloApp.Views.Shared.Components.ContentAreas;
 
 namespace CarameloApp.Views.Pets.Pages
 {
-	// página de cadastro de pet
-	public class AddPetPage : PetForm
+	/// <summary>
+	/// Página para adicionar Pets
+	/// </summary>
+	public class AddPetPage : PetFormPage
 	{
 		public AddPetPage()
 		{
@@ -32,16 +33,18 @@ namespace CarameloApp.Views.Pets.Pages
 			try
 			{
 				ValidateForm();
+				var userId = _sessionService.GetUserId();
 
 				Pet pet = new Pet
 				{
 					Name = _nameEntry.Text,
 					Species = GetSelectedSpecies(),
 					Sex = GetSelectedSex(),
-					Size = GetSelectedSize()
+					Size = GetSelectedSize(),
+					UserId = userId
 				};
 
-				_petRepository.Insert(pet);
+				_petService.Insert(pet);
 
 				await DisplayAlert(null, $"{pet.Name} salv{pet.GetPronounLetter()}", "Ok");
 				await Navigation.PopAsync();

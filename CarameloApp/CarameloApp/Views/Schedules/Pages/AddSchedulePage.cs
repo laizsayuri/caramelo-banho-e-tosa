@@ -2,18 +2,21 @@
 using System.Linq;
 using Xamarin.Forms;
 using CarameloApp.Models;
-using CarameloApp.Views.Schedules.Forms;
 using CarameloApp.Views.Shared.Components;
-using CarameloApp.Views.Shared.ContentAreas;
+using CarameloApp.Views.Shared.Components.ContentAreas;
 
 namespace CarameloApp.Views.Schedules.Pages
 {
-	// página de cadastro de agendamentos
-	public class AddSchedulePage : ScheduleForm
+	/// <summary>
+	/// Página para marcar Agendamentos
+	/// </summary>
+	public class AddSchedulePage : ScheduleFormPage
 	{
 		public AddSchedulePage()
 		{
 			Title = "Novo agendamento";
+
+			_pets.ForEach(x => x.IsSelected = false);
 
 			var center = GenerateCenterFormStackLayout();
 
@@ -33,15 +36,17 @@ namespace CarameloApp.Views.Schedules.Pages
 			try
 			{
 				ValidateForm();
+				var userId = _sessionService.GetUserId();
 
 				Schedule schedule = new Schedule
 				{
 					DateTime = _datePicker.Date.AddTicks(_timePicker.Time.Ticks),
 					ServiceType = GetSelectedServiceType(),
-					Pets = _pets.Where(X => X.IsSelected).ToList()
+					Pets = _pets.Where(X => X.IsSelected).ToList(),
+					UserId = userId
 				};
 
-				_scheduleRepository.Insert(schedule);
+				_scheduleService.Insert(schedule);
 
 				await DisplayAlert(null, $"Serviço agendado", "Ok");
 				await Navigation.PopAsync();

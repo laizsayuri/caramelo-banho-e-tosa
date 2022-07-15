@@ -1,14 +1,15 @@
 ﻿using System;
 using Xamarin.Forms;
 using CarameloApp.Models;
-using CarameloApp.Views.Pets.Forms;
 using CarameloApp.Views.Shared.Components;
-using CarameloApp.Views.Shared.ContentAreas;
+using CarameloApp.Views.Shared.Components.ContentAreas;
 
 namespace CarameloApp.Views.Pets.Pages
 {
-	// página de edição de pet
-	public class EditPetPage : PetForm
+	/// <summary>
+	/// Página para editar Pets
+	/// </summary>
+	public class EditPetPage : PetFormPage
 	{
 		private readonly Pet _pet;
 
@@ -40,7 +41,7 @@ namespace CarameloApp.Views.Pets.Pages
 
 			if (answer)
 			{
-				_petRepository.Delete(_pet);
+				_petService.Delete(_pet);
 
 				await DisplayAlert(null, $"{_pet.Name} excluíd{_pet.GetPronounLetter()}", "Ok");
 				await Navigation.PopAsync();
@@ -52,6 +53,7 @@ namespace CarameloApp.Views.Pets.Pages
 			try
 			{
 				ValidateForm();
+				var userId = _sessionService.GetUserId();
 
 				Pet pet = new Pet
 				{
@@ -59,10 +61,11 @@ namespace CarameloApp.Views.Pets.Pages
 					Name = _nameEntry.Text,
 					Species = GetSelectedSpecies(),
 					Sex = GetSelectedSex(),
-					Size = GetSelectedSize()
+					Size = GetSelectedSize(),
+					UserId = userId
 				};
 
-				_petRepository.Update(pet);
+				_petService.Update(pet);
 
 				await DisplayAlert(null, $"{pet.Name} atualizado", "Ok");
 				await Navigation.PopAsync();

@@ -2,7 +2,9 @@
 
 namespace CarameloApp.Views.Shared.Components
 {
-	// label para listagens vazias
+	/// <summary>
+	/// Label utilizado para mostrar mensagens de listas vazias
+	/// </summary>
 	public class EmptyLabel : CustomLabel
 	{
 		public EmptyLabel(string text)

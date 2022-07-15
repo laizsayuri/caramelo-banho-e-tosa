@@ -1,23 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Xamarin.Forms;
-using CarameloApp.Data;
 using CarameloApp.Models;
-using CarameloApp.Views.Schedules.ListViews;
-using CarameloApp.Views.Shared.ContentAreas;
 using CarameloApp.Views.Shared.Components;
+using CarameloApp.Services;
+using CarameloApp.Views.Shared.Components.ContentAreas;
+using CarameloApp.Views.Schedules.Components;
+using CarameloApp.Views.Shared.Pages;
 
 namespace CarameloApp.Views.Schedules.Pages
 {
-	// página inicial da área de agendamentos
-	public class ScheduleHomePage : ContentPage
+	/// <summary>
+	/// Listagem inicial de Agendamentos
+	/// </summary>
+	public class ScheduleHomePage : TabsRootPage
 	{
-		private readonly ScheduleRepository _scheduleRepository = DependencyService.Get<ScheduleRepository>();
-		private readonly PetRepository _petRepository = DependencyService.Get<PetRepository>();
+		private readonly ScheduleService _scheduleService;
+		private readonly SessionService _sessionService;
 
-		public ScheduleHomePage()
+		public ScheduleHomePage(TabsPage root, ToolbarItem toolbarItem) : base(root, toolbarItem)
 		{
+			_scheduleService = DependencyService.Get<ScheduleService>();
+			_sessionService = DependencyService.Get<SessionService>();
+
 			Title = "Meus agendamentos";
 		}
 
@@ -29,7 +34,7 @@ namespace CarameloApp.Views.Schedules.Pages
 			{
 				VerticalOptions = LayoutOptions.Center,
 				HorizontalOptions = LayoutOptions.End,
-				IsChecked = onlyConcluded,				
+				IsChecked = onlyConcluded,
 			};
 			onlyConcludedCheckbox.CheckedChanged += OnlyConcludedCheckbox_CheckedChanged;
 
@@ -49,17 +54,21 @@ namespace CarameloApp.Views.Schedules.Pages
 
 			var center = new Center(new View[] {
 				GetSchedulesList(onlyConcluded)
-			});
-			center.Margin = new Thickness(0);
+			})
+			{
+				Margin = new Thickness(0)
+			};
 
-			var addScheduleButton = new CustomButton("Agendar serviço");			
+			var addScheduleButton = new CustomButton("Agendar serviço");
 			addScheduleButton.Clicked += AddScheduleButton_Clicked;
 
 			var botton = new Bottom(new View[]
 			{
 				addScheduleButton
-			});
-			botton.IsVisible = !onlyConcluded;
+			})
+			{
+				IsVisible = !onlyConcluded
+			};
 
 			Content = new Content(top, center, botton);
 		}
@@ -71,42 +80,39 @@ namespace CarameloApp.Views.Schedules.Pages
 
 		private View GetSchedulesList(bool onlyConcluded = false)
 		{
-			var schedules = new List<Schedule>();
+			var schedules = _sessionService.GetScheduleList();
+
+			if (schedules == null || !schedules.Any())
+				return new EmptyLabel(onlyConcluded ? "Não há registros de serviços concluídos" : "Nenhum serviço agendado");
+
+			schedules = schedules.Where(x => x.Concluded == onlyConcluded).ToList();
+			ScheduleListView listView;
 
 			if (onlyConcluded)
-				schedules = _scheduleRepository.GetConcluded();
+				listView = new ScheduleListView(schedules);
 			else
-				schedules = _scheduleRepository.GetNotConcluded();
+				listView = new ScheduleListView(schedules, true, (sender, e) => ScheduleListView_CheckboxChecked(sender, e));
 
-			if (schedules != null && schedules.Any())
-			{
-				ScheduleListView listView;
-				
-				if (onlyConcluded)
-					listView = new ScheduleListView(schedules);
-				else
-					listView = new ScheduleListView(schedules, true, (sender, e) => ScheduleListView_CheckboxChecked(sender, e));
-
-				listView.ItemSelected += ScheduleListView_ItemSelected;
-				return listView;
-			}
-			else
-				return new EmptyLabel("Nenhum serviço agendado");
-
+			listView.ItemSelected += ScheduleListView_ItemSelected;
+			return listView;
 		}
 
 		private async void ScheduleListView_CheckboxChecked(object sender, CheckedChangedEventArgs e)
 		{
 			var checkBox = (CheckBox)sender;
 			var parent = (StackLayout)checkBox.Parent;
-			var scheduleId = Convert.ToInt32(((Label)parent.Children[0]).Text);
 
 			var answer = await DisplayAlert(null, $"Deseja concluir o agendamento?", "Concluir", "Cancelar");
 
 			if (answer)
 			{
-				_scheduleRepository.Conclude(scheduleId);
-				await DisplayAlert(null, $"Agendamento concluido", "Ok");				
+				var scheduleId = Convert.ToInt32(((Label)parent.Children[0]).Text);
+				var schedule = _sessionService.GetScheduleList().FirstOrDefault(x => x.Id == scheduleId);
+				schedule.Concluded = true;
+
+				_scheduleService.Update(schedule);
+
+				await DisplayAlert(null, $"Agendamento concluido", "Ok");
 			}
 
 			SetContent();
@@ -120,7 +126,9 @@ namespace CarameloApp.Views.Schedules.Pages
 
 		private async void AddScheduleButton_Clicked(object sender, EventArgs e)
 		{
-			if (!_petRepository.GetAll().Any())
+			var pets = _sessionService.GetPetList();
+
+			if (!pets.Any())
 				await DisplayAlert(null, $"Primeiro registre pets para poder realizar agendamentos!", "Ok");
 			else
 				await Navigation.PushAsync(new AddSchedulePage());

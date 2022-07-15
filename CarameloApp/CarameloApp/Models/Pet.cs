@@ -4,8 +4,9 @@ using System.Collections.Generic;
 
 namespace CarameloApp.Models
 {
-	// classe Pet
-
+	/// <summary>
+	/// Classe Pet e métodos auxiliares
+	/// </summary>
 	[Table("Pet")]
 	public class Pet : BaseEntity
 	{
@@ -14,10 +15,12 @@ namespace CarameloApp.Models
 		public Sex Sex { get; set; }
 		public Size Size { get; set; }
 
+		[ForeignKey(typeof(User))]
+		public int UserId { get; set; }
+
 		[ManyToMany(typeof(ScheduleAnimal))]
 		public List<Schedule> Schedules { get; set; }
 
-		// pega descrição da raça
 		[Ignore]
 		public string SpeciesDescription
 		{
@@ -35,7 +38,6 @@ namespace CarameloApp.Models
 			}
 		}
 
-		// pega descrição do sexo
 		[Ignore]
 		public string SexDescription
 		{
@@ -53,7 +55,6 @@ namespace CarameloApp.Models
 			}
 		}
 
-		// pega descrição do tamanho
 		[Ignore]
 		public string SizeDescription
 		{
@@ -73,23 +74,8 @@ namespace CarameloApp.Models
 			}
 		}
 
-		// pega arquivo utilizado na List View
 		[Ignore]
-		public string PicFile
-		{
-			get
-			{
-				switch (Species)
-				{
-					case Species.Dog:
-						return "dog_pic.png";
-					case Species.Cat:
-						return "cat_pic.png";
-					default:
-						return "";
-				}
-			}
-		}
+		public string PicFile => $"{Species}_{Sex}_{Size}.png".ToLower();
 
 		[Ignore]
 		public bool IsSelected { get; set; }

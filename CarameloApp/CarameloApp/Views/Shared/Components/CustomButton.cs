@@ -1,8 +1,11 @@
-﻿using Xamarin.Forms;
+﻿using CarameloApp.Resources;
+using Xamarin.Forms;
 
 namespace CarameloApp.Views.Shared.Components
 {
-	// botão personalizado do projeto
+	/// <summary>
+	/// Button personalizado
+	/// </summary>
 	public class CustomButton : Button
 	{
 		public CustomButton(string text)
@@ -15,8 +18,10 @@ namespace CarameloApp.Views.Shared.Components
 			BorderColor = CarameloColors.TextColor;
 			BorderWidth = 1;
 			CornerRadius = 17;
+			
+			Margin = new Thickness(50, 0);
 
-			HorizontalOptions = LayoutOptions.CenterAndExpand;
+			HorizontalOptions = LayoutOptions.FillAndExpand;
 			VerticalOptions = LayoutOptions.EndAndExpand;
 		}
 	}

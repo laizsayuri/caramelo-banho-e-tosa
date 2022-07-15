@@ -2,7 +2,9 @@
 
 namespace CarameloApp.Models
 {
-	// classe base para as entidades do projeto
+	/// <summary>
+	/// Classe base para entidades da aplicação
+	/// </summary>
 	public class BaseEntity
 	{
 		[PrimaryKey, AutoIncrement]
